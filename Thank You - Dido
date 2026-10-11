@@ -127,7 +127,7 @@ def twinkle_particles():
 
 # ---------------- glow ----------------
 GLOW_A = (226, 232, 240)   # bright
-GLOW_B = (1, 84, 130)   # biru pekat menyala abgkuh
+GLOW_B = (1, 84, 130)   # blue
 
 
 def glow_effect(t=0.0):
