@@ -1,0 +1,131 @@
+import pygame
+import random
+import sys
+
+pygame.init()
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("dimana aku di sini - Naif")
+clock = pygame.time.Clock()
+
+# 2. PENGATURAN WARNA
+WARNA_BACKGROUND = (10, 10, 12)
+WARNA_BINTANG    = (255, 255, 255)
+WARNA_TEKS       = (240, 240, 240)
+
+
+font = pygame.font.SysFont("couriernew", 32, bold=True)
+
+# === TEMPAT NARO LIRIK & ATUR KECEPATAN MASING-MASING ===
+# "text"         : Kalimat liriknya. Gunakan \n untuk membuat baris baru (seperti pada intro).
+# "kecepatan"    : Jeda per huruf (milidetik). Makin kecil = makin cepat ngetiknya.
+# "jeda_selesai" : Waktu diam setelah kalimat beres diketik sebelum ganti lirik baru.
+LIRIK_LAGU = [
+    
+    {
+        "text": "*•*❁✺*•.  .•*✺❁ •*\n Dimana Aku Disini\nby Naif\n*•*❁✺*•.  .•*✺❁ •*", 
+        "kecepatan": 0,  
+        "jeda_selesai": 2000
+    },
+
+    {"text": "Kau yang selalu bilang,", "kecepatan": 125,  "jeda_selesai": 100},  
+    {"text": "Selalu bilang 'Tuk tetap aku di sini", "kecepatan": 100, "jeda_selesai": 4000},  
+    {"text": "Takkah berarti?",    "kecepatan": 100, "jeda_selesai": 1000},  
+    {"text": "Bahwa yang kau bilang yang kau bilang", "kecepatan": 85,  "jeda_selesai": 50},   
+    {"text": "Kita saling memiliki",    "kecepatan": 100, "jeda_selesai": 4000},  
+    {"text": "Takkah berarti?",    "kecepatan": 100, "jeda_selesai": 200},  
+    {"text": "Kau yang selalu bilang,",    "kecepatan": 100, "jeda_selesai": 100},  
+    {"text": "Selalu bilang 'Tuk tetap aku di sini",    "kecepatan": 100, "jeda_selesai": 4000},  
+    {"text": "Takkah berarti?",    "kecepatan": 100, "jeda_selesai": 700},  
+    {"text": "Bahwa yang kau bilang yang kau bilang",    "kecepatan": 90, "jeda_selesai": 50},  
+    {"text": "Kita saling memiliki",    "kecepatan": 125, "jeda_selesai": 4000},  
+    {"text": "Di mana aku di sini?",    "kecepatan": 125, "jeda_selesai": 3800},  
+    {"text": "Di mana aku di sini?",    "kecepatan": 125, "jeda_selesai": 2000},  
+    {"text": "Made by Zaidan/zaidfhm",    "kecepatan": 50, "jeda_selesai": 500},  
+
+]
+
+index_lirik = 0
+jumlah_huruf_tampil = 0
+waktu_huruf_terakhir = pygame.time.get_ticks()
+waktu_selesai_mengetik = 0
+sudah_selesai_ketik = False
+
+
+bintang_list = []
+for i in range(150):
+    x = random.randint(0, WIDTH)
+    y = random.randint(0, HEIGHT)
+    kecepatan = random.uniform(0.5, 2.0)
+    ukuran = random.randint(1, 3)
+    bintang_list.append([x, y, kecepatan, ukuran])
+
+
+running = True
+while running:
+    clock.tick(60)
+    waktu_sekarang = pygame.time.get_ticks()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    screen.fill(WARNA_BACKGROUND)
+
+    
+    for bintang in bintang_list:
+        bintang[1] += bintang[2] 
+        if bintang[1] > HEIGHT:
+            bintang[1] = 0
+            bintang[0] = random.randint(0, WIDTH)
+        pygame.draw.circle(screen, WARNA_BINTANG, (int(bintang[0]), int(bintang[1])), bintang[3])
+
+   
+    if index_lirik < len(LIRIK_LAGU):
+        lirik_aktif = LIRIK_LAGU[index_lirik]
+        teks_penuh = lirik_aktif["text"]
+        
+        
+        kecepatan_sekarang = lirik_aktif["kecepatan"]
+
+       
+        if jumlah_huruf_tampil < len(teks_penuh):
+            if waktu_sekarang - waktu_huruf_terakhir > kecepatan_sekarang:
+                jumlah_huruf_tampil += 1
+                waktu_huruf_terakhir = waktu_sekarang
+                
+                if jumlah_huruf_tampil == len(teks_penuh):
+                    waktu_selesai_mengetik = waktu_sekarang
+                    sudah_selesai_ketik = True
+
+        
+        teks_potongan = teks_penuh[:jumlah_huruf_tampil]
+        baris_baris = teks_potongan.split('\n')
+        
+        
+        tinggi_font = font.get_linesize()
+        total_tinggi = len(baris_baris) * tinggi_font
+        y_awal = (HEIGHT // 2) - (total_tinggi // 2)
+
+        for i, baris in enumerate(baris_baris):
+            text_surface = font.render(baris, True, WARNA_TEKS)
+            text_rect = text_surface.get_rect(center=(WIDTH // 2, y_awal + (i * tinggi_font) + (tinggi_font // 2)))
+            screen.blit(text_surface, text_rect)
+
+        
+        if sudah_selesai_ketik and (waktu_sekarang - waktu_selesai_mengetik > lirik_aktif["jeda_selesai"]):
+            index_lirik += 1
+            jumlah_huruf_tampil = 0
+            sudah_selesai_ketik = False
+            waktu_huruf_terakhir = waktu_sekarang
+    else:
+        
+        index_lirik = 0
+        jumlah_huruf_tampil = 0
+        sudah_selesai_ketik = False
+        waktu_huruf_terakhir = waktu_sekarang
+
+    pygame.display.flip()
+
+pygame.quit()
+sys.exit()
