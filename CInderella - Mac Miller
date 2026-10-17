@@ -1,0 +1,198 @@
+import tkinter as tk
+
+
+class KotakTeks:
+    LEBAR_KOTAK = 500
+    TINGGI_KOTAK = 150
+    WARNA_TRANSPARAN = "#1a1a1a"
+    JEDA_KEDIP_DETIK = 0.15
+    WARNA_KOTAK = ("#000000", "#ffffff")
+    WARNA_TEKS = ("#ffffff", "#000000")
+    FONT_TEKS = ("Helvetica", 24, "bold")
+
+    def __init__(
+        self,
+        jendela_utama,
+        teks,
+        x=100,
+        y=100,
+        muncul_pada_detik=0,
+        jeda_teks_detik=0.35,
+        kecepatan_teks_detik=0.1,
+    ):
+        self.jendela_utama = jendela_utama
+        self.teks_lengkap = teks
+        self.indeks_teks = 0
+        self.kecepatan_teks_ms = int(kecepatan_teks_detik * 1000)
+        self.x = x
+        self.y = float(y)
+        self.aktif = False
+
+        self.jendela = tk.Toplevel(jendela_utama)
+        self.jendela.overrideredirect(True)
+        self.jendela.attributes("-topmost", True)
+        self.jendela.attributes("-transparentcolor", self.WARNA_TRANSPARAN)
+        self.jendela.geometry(f"{self.LEBAR_KOTAK}x{self.TINGGI_KOTAK}+{x}+{y}")
+        self.jendela.resizable(False, False)
+        self.jendela.withdraw()
+
+        self.kanvas = tk.Canvas(
+            self.jendela,
+            width=self.LEBAR_KOTAK,
+            height=self.TINGGI_KOTAK,
+            bg=self.WARNA_TRANSPARAN,
+            highlightthickness=0,
+        )
+        self.kanvas.pack()
+        self.bentuk_kotak = self.kanvas.create_rectangle(
+            4,
+            4,
+            self.LEBAR_KOTAK - 4,
+            self.TINGGI_KOTAK - 4,
+            fill=self.WARNA_KOTAK[0],
+            outline=self.WARNA_KOTAK[1],
+            width=2,
+        )
+        self.bentuk_teks = self.kanvas.create_text(
+            self.LEBAR_KOTAK // 2,
+            self.TINGGI_KOTAK // 2,
+            text="",
+            font=self.FONT_TEKS,
+            fill=self.WARNA_TEKS[0],
+            width=self.LEBAR_KOTAK - 40,
+            justify="center",
+        )
+
+        self.jendela_utama.after(
+            int(muncul_pada_detik * 1000),
+            lambda: self.tampilkan(int(jeda_teks_detik * 1000)),
+        )
+
+    def tampilkan(self, jeda_teks_ms):
+        self.aktif = True
+        self.jendela.deiconify()
+        self.kedipkan(0)
+        self.jendela.after(jeda_teks_ms, self.tampilkan_teks)
+
+    def kedipkan(self, indeks_warna):
+        indeks_warna_berikutnya = 1 - indeks_warna
+        self.kanvas.itemconfigure(
+            self.bentuk_kotak,
+            fill=self.WARNA_KOTAK[indeks_warna],
+            outline=self.WARNA_KOTAK[indeks_warna_berikutnya],
+        )
+        self.kanvas.itemconfigure(
+            self.bentuk_teks,
+            fill=self.WARNA_TEKS[indeks_warna],
+        )
+        self.jendela.after(
+            int(self.JEDA_KEDIP_DETIK * 1000),
+            lambda: self.kedipkan(indeks_warna_berikutnya),
+        )
+
+    def naik(self, dy):
+        self.y -= dy
+        self.jendela.geometry(f"+{int(self.x)}+{int(self.y)}")
+
+    def di_luar_layar(self):
+        return self.y + self.TINGGI_KOTAK < 0
+
+    def tampilkan_teks(self):
+        if self.indeks_teks <= len(self.teks_lengkap):
+            teks_sementara = self.teks_lengkap[: self.indeks_teks]
+            self.kanvas.itemconfigure(self.bentuk_teks, text=teks_sementara)
+            self.indeks_teks += 1
+            self.jendela.after(self.kecepatan_teks_ms, self.tampilkan_teks)
+
+
+def gerakkan_kotak(jendela_utama, daftar_kotak):
+    kotak_tersisa = []
+    for kotak in daftar_kotak:
+        if kotak.aktif:
+            kotak.naik(0.5)
+
+        if kotak.di_luar_layar():
+            kotak.jendela.destroy()
+        else:
+            kotak_tersisa.append(kotak)
+
+    if kotak_tersisa:
+        jendela_utama.after(
+            10,
+            lambda: gerakkan_kotak(jendela_utama, kotak_tersisa),
+        )
+    else:
+        jendela_utama.destroy()
+
+
+if __name__ == "__main__":
+    jendela_utama = tk.Tk()
+    jendela_utama.withdraw()
+
+    # muncul_pada_detik dihitung sejak program dimulai.
+    # jeda_teks_detik dihitung sejak kotak muncul sampai teks mulai mengetik.
+    # kecepatan_teks_detik adalah jeda antarhuruf; makin kecil, makin cepat.
+    daftar_kotak = [
+        KotakTeks(
+            jendela_utama,
+            "DADDY TOLD YOU,\nBETTER BRING YOUR ASS HOME",
+            x=150,
+            y=500,
+            muncul_pada_detik=0,
+            jeda_teks_detik=0.30,
+            kecepatan_teks_detik=0.06,
+        ),
+        KotakTeks(
+            jendela_utama,
+            "CINDERELLA, BETTER\nGET YOUR ASS HOME,",
+            x=700,
+            y=600,
+            muncul_pada_detik=4,
+            jeda_teks_detik=0.30,
+            kecepatan_teks_detik=0.06,
+        ),
+
+         KotakTeks(
+            jendela_utama,
+            "MAN, I SWEAR\nTHAT PARENTS JUST DONT UNDERSTAND",
+            x=150,
+            y=700,
+            muncul_pada_detik=7,
+            jeda_teks_detik=0.30,
+            kecepatan_teks_detik=0.05,
+        ),
+
+ KotakTeks(
+            jendela_utama,
+            "YOU AIN'T GOTTA\nBE OLD TO BE A MAN",
+            x=700,
+            y=800,
+            muncul_pada_detik=11,
+            jeda_teks_detik=0.30,
+            kecepatan_teks_detik=0.05,
+        ),
+
+ KotakTeks(
+            jendela_utama,
+            "TAKE MY HAND,\nCOME WITH ME TO MY ROOM",
+            x=150,
+            y=900,
+            muncul_pada_detik=14,
+            jeda_teks_detik=0.30,
+            kecepatan_teks_detik=0.07,
+        ),
+
+KotakTeks(
+            jendela_utama,
+            "MADE BY ZAIDAN\nAND COPILOT",
+            x=500,
+            y=900,
+            muncul_pada_detik=20,
+            jeda_teks_detik=0.30,
+            kecepatan_teks_detik=0.07,
+        ),
+    ]
+    
+
+    gerakkan_kotak(jendela_utama, daftar_kotak)
+    jendela_utama.mainloop()
