@@ -19,7 +19,6 @@ lyrics = [
     ("Banyak rindunya", 0.17, 3.5),
     ("Uh-hu-hu..", 0.13, 1.5),
     ("Uh-hu-hu, hu-uh..", 0.13, 2.0),
-    ("made by zaidan / zaidfhm", 0.09, 5.0),
 ]
 
 root = tk.Tk()
