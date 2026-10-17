@@ -41,7 +41,6 @@ LIRIK_LAGU = [
     {"text": "Kita saling memiliki",    "kecepatan": 125, "jeda_selesai": 4000},  
     {"text": "Di mana aku di sini?",    "kecepatan": 125, "jeda_selesai": 3800},  
     {"text": "Di mana aku di sini?",    "kecepatan": 125, "jeda_selesai": 2000},  
-    {"text": "Made by Zaidan/zaidfhm",    "kecepatan": 50, "jeda_selesai": 500},  
 
 ]
 
